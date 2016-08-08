@@ -1,0 +1,12 @@
+*.pyc
+.ipynb
+.idea
+.cache
+.egg-info
+out.fasta
+out.log
+
+build/
+dist/
+
+runtests.py
