@@ -82,8 +82,10 @@ def demultiplexfastq(forward_fastq, reverse_fastq, barcodefile, barcodelength, m
         forwardseqlist = defaultdict(list)
         reverseseqlist = defaultdict(list)
 
+        # grouper fills with `None` so we need to remove them
+        fastqsnotnone = (fq for fq in group if fq)
 
-        for fastqs in group:
+        for fastqs in fastqsnotnone:
             sample = fastqs["sample"]
             fq = fastqs["forward_rec"]
             rq = fastqs["reverse_rec"]
@@ -95,11 +97,12 @@ def demultiplexfastq(forward_fastq, reverse_fastq, barcodefile, barcodelength, m
                 barcode_mismatched += 1
 
             if shouldwrite(fastqs, barcodedistance=max_mismatches, keepunassigned=keepunassigned):
-                sampledict[sample] += 1
 
-                # if keepunassigned is true and sample is None, write ot Unassigned
+                # if keep unassigned is true and sample is None, write to Unassigned
                 if sample is None:
                     sample = "Unassigned"
+
+                sampledict[sample] += 1
 
                 forwardseqlist[sample].append(fq)
                 reverseseqlist[sample].append(rq)
