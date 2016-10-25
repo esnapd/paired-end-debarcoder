@@ -3,7 +3,6 @@ from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
 
-
 class PyTest(TestCommand):
     """
     pytest class for runnin py.test test.
@@ -31,14 +30,13 @@ class PyTest(TestCommand):
 
 setup(
     name='paired-end-debarcoder',
-    version='0.1.0',
+    version='0.1.1',
     install_requires=[
         'Click >= 0.6.0',
         'Biopython >=1.6.5',
         'cytoolz',
-        'pandas',
-        'requests',
-        'multiprocess'
+        'multiprocess',
+        'schema'
     ],
     packages=["paired_end_debarcoder"],
     entry_points='''

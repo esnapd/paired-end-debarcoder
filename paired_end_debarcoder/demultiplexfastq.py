@@ -9,11 +9,19 @@ import os
 
 from Bio import SeqIO
 from collections import defaultdict
+from itertools import zip_longest
 from .barcodes import process_barcodefile, hamdist
 
 
 ###################################################################
 ## Public Functions
+
+def grouper(iterable, n, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
+    args = [iter(iterable)] * n
+    return zip_longest(fillvalue=fillvalue, *args)
+
 
 @click.command()
 @click.option('--forward_fastq', type=click.Path(exists=True), prompt=True,help="name of the fastq forward file")
@@ -58,6 +66,9 @@ def demultiplexfastq(forward_fastq, reverse_fastq, barcodefile, barcodelength, m
                                           barcodelength=barcodelength,
                                           maxdistance=max_mismatches) for fastq in fastqs)
 
+    # chunk the fastqs to reduce the nubmer of files we write
+    groups = grouper(checked_fastqs, 50000)
+
     samples = 0
     mismatched_samples = 0
     barcode_mismatched = 0
@@ -66,31 +77,42 @@ def demultiplexfastq(forward_fastq, reverse_fastq, barcodefile, barcodelength, m
     if not os.path.exists(outdirectory):
         os.mkdir(outdirectory)
 
-    for fastqs in checked_fastqs:
-        sample = fastqs["sample"]
-        fq = fastqs["forward_rec"]
-        rq = fastqs["reverse_rec"]
+    for group in groups:
+        # These dicts will acculate seqs which we will periodically write
+        forwardseqlist = defaultdict(list)
+        reverseseqlist = defaultdict(list)
 
-        samples += 1
-        if sample is None:
-            mismatched_samples += 1
-        if fastqs['barcode_distance'] > max_mismatches:
-            barcode_mismatched += 1
 
-        if shouldwrite(fastqs, barcodedistance=max_mismatches, keepunassigned=keepunassigned):
-            sampledict[sample] += 1
+        for fastqs in group:
+            sample = fastqs["sample"]
+            fq = fastqs["forward_rec"]
+            rq = fastqs["reverse_rec"]
 
-            # if keepunassigned is true and sample is None, write ot Unassigned
+            samples += 1
             if sample is None:
-                sample = "Unassigned"
+                mismatched_samples += 1
+            if fastqs['barcode_distance'] > max_mismatches:
+                barcode_mismatched += 1
 
+            if shouldwrite(fastqs, barcodedistance=max_mismatches, keepunassigned=keepunassigned):
+                sampledict[sample] += 1
+
+                # if keepunassigned is true and sample is None, write ot Unassigned
+                if sample is None:
+                    sample = "Unassigned"
+
+                forwardseqlist[sample].append(fq)
+                reverseseqlist[sample].append(rq)
+
+        for sample, fqs in forwardseqlist.items():
             fqout = outdirectory + "/" + sample + "_F.fq"
-            rqout = outdirectory + "/" + sample + "_R.fq"
-
             with open(fqout, "a") as handle:
-                SeqIO.write(fq, handle, "fastq")
+                SeqIO.write(fqs, handle, "fastq")
+        for sample, rqs in reverseseqlist.items():
+            rqout = outdirectory + "/" + sample + "_R.fq"
             with open(rqout, "a") as handle:
-                SeqIO.write(rq, handle, "fastq")
+                SeqIO.write(rqs, handle, "fastq")
+
 
     # write out the log here
     logfile.write("Demultiplex Log\n")
