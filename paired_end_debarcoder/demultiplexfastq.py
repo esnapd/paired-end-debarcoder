@@ -196,6 +196,13 @@ def check_barcode_fastq(fastqs, barcodedict, barcodelength, maxdistance):
             rq = rq[len(reverse_spacer):]
             spacermismatch = True
 
+    samplewrite  = "Unassigned" if sample is None else sample
+    fq.id =  "{}.{} barcode:{} barcodemismatches:{} spacermismatch: {}".format(
+            samplewrite, fq.id, barcode, barcode_distance, str(spacermismatch))
+    fq.id =  "{}.{} barcode:{} barcodemismatches:{} spacermismatch: {}".format(
+            samplewrite, rq.id, barcode, barcode_distance, str(spacermismatch))
+
+
     # return updated values
     return {"sample": samplematch,
             "spacermismatch": spacermismatch,
