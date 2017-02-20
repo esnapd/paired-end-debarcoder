@@ -13,8 +13,8 @@ from Bio.SeqIO.QualityIO import FastqGeneralIterator
 @click.option('--keep_right', type=click.INT, default=175, help="how much of the reverse reads should be kept")
 @click.option('--revcomp/--no-revcomp', default=False, help="whether to reverse complement the second file")
 @click.option('--spacer/--no-spacer', default=True, help="add a spacer sequence between forward and reverse")
-@click.option('--spacercharacters', default="NNNNNNNNNN", help="add a spacer sequence between forward and reverse")
-@click.option('--samplename', default=None, help="provide a sample anem to prefix reads with")
+@click.option('--spacercharacters', default="N", help="add a spacer sequence between forward and reverse")
+@click.option('--samplename', default=None, help="provide a sample name to prefix reads with")
 def fastqconcat(forward_fastq, reverse_fastq, outfile, discard, keep_left, keep_right, revcomp,
                 spacer, spacercharacters, samplename):
     """
@@ -39,7 +39,7 @@ def fastqconcat(forward_fastq, reverse_fastq, outfile, discard, keep_left, keep_
     
     """
 
-    #If smaplename is not provided make it
+    #If samplename is not provided make it
     if samplename is None:
         samplename = ""
     else:
