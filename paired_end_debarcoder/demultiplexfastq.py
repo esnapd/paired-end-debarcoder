@@ -33,8 +33,9 @@ def grouper(iterable, n, fillvalue=None):
 @click.option('--logfile', type=click.File('w'), prompt=True, help="outputlogfile")
 @click.option('--checkbarcodes/--no-checkbarcodes', default=True, help="check the barcodes file")
 @click.option('--keepunassigned/--no-keepunassigned', default=True)
+@click.option('--chunksize', default=100000)
 def demultiplexfastq(forward_fastq, reverse_fastq, barcodefile, barcodelength, max_mismatches, outdirectory,
-                     logfile, checkbarcodes, keepunassigned):
+                     logfile, checkbarcodes, keepunassigned, chunksize):
     """
     Demultiplexing paired Fastq files with a barcode file.
 
@@ -67,7 +68,7 @@ def demultiplexfastq(forward_fastq, reverse_fastq, barcodefile, barcodelength, m
                                           maxdistance=max_mismatches) for fastq in fastqs)
 
     # chunk the fastqs to reduce the nubmer of files we write
-    groups = grouper(checked_fastqs, 100000)
+    groups = grouper(checked_fastqs, chunksize)
 
     samples = 0
     mismatched_samples = 0

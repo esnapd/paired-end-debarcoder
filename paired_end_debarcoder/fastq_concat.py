@@ -40,9 +40,7 @@ def fastqconcat(forward_fastq, reverse_fastq, outfile, discard, keep_left, keep_
     """
 
     # If samplename is not provided make it
-    if samplename is None:
-        samplename = ""
-    else:
+    if samplename is not None:
         samplename = samplename + "_"
 
     fastq_f = FastqGeneralIterator(forward_fastq)
