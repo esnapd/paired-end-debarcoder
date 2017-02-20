@@ -39,7 +39,7 @@ def fastqconcat(forward_fastq, reverse_fastq, outfile, discard, keep_left, keep_
     
     """
 
-    #If samplename is not provided make it
+    # If samplename is not provided make it
     if samplename is None:
         samplename = ""
     else:

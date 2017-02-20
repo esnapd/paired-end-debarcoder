@@ -30,7 +30,7 @@ class PyTest(TestCommand):
 
 setup(
     name='paired-end-debarcoder',
-    version='0.1.2',
+    version='0.1.3',
     install_requires=[
         'Click >= 0.6.0',
         'Biopython >=1.6.5',

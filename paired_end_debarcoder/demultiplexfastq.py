@@ -67,7 +67,7 @@ def demultiplexfastq(forward_fastq, reverse_fastq, barcodefile, barcodelength, m
                                           maxdistance=max_mismatches) for fastq in fastqs)
 
     # chunk the fastqs to reduce the nubmer of files we write
-    groups = grouper(checked_fastqs, 50000)
+    groups = grouper(checked_fastqs, 100000)
 
     samples = 0
     mismatched_samples = 0
