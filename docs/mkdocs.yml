@@ -1,0 +1,8 @@
+site_name: paired-end-debarcoder
+
+
+theme: readthedocs
+
+pages:
+- Home: index.md
+- Workflow: workflow.md
