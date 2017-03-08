@@ -48,11 +48,9 @@ primers are on the bottom.
 ## The Mapping File
 
 Several functions in `paired-end-debarcoder` including `demutliplexfastq`, `demultiplexfasta`, and `demultiplexfasta-parallel` require
-a Mapping file that will tell the program what barcode belongs to what sample. The Mapping File looks something like this (taken from the test):
+a Mapping file that will tell the program what barcode belongs to what sample. This example, taken from the test data, shows only the first 8 (required columns) of the mapping file.
 
-
-
-
+![mappingfile](images/mappingfile.png)
 
 
 ## Sample Usage Within a Makefile
@@ -61,48 +59,48 @@ Use the demultiplex fastq file to process paired end FQs and split them into per
 directory. 
 
 ```makefile
-fq1 = sample1_F.fq.gz
-fq2 = sample1_R.fq.gz
+	fq1 = sample1_F.fq.gz
+	fq2 = sample1_R.fq.gz
 
-# debarcode the reads in your fastq files to the fastqs directory
-demultiplex:
-	demultiplexfastq \
-	  --forward_fastq <(zcat $(fq1)) \
-	  --reverse_fastq <(zcat $(fq2)) \
-	  --barcodefile $(mappingfile) \
-	  --barcodelength 16 \
-	  --max_mismatches 0 \
-	  --outdirectory fastqs \
-	  --logfile logfile_primer.txt
+	# debarcode the reads in your fastq files to the fastqs directory
+	demultiplex:
+		demultiplexfastq \
+		  --forward_fastq <(zcat $(fq1)) \
+		  --reverse_fastq <(zcat $(fq2)) \
+		  --barcodefile $(mappingfile) \
+		  --barcodelength 16 \
+		  --max_mismatches 0 \
+		  --outdirectory fastqs \
+		  --logfile logfile_primer.txt
 		
 ```
 
 Take the paired-end fastq files and process them by concatenating them together and prepending your sample name to the output fasta file.
 
 ```makefile
-# define the jobs to be processed
-fqs = $(wildcard fastqs/*_F.fq)
-processdir = processed
-combined      = $(patsubst fastqs/%_F.fq, $(processdir)/%_combined.fq, $(fqs))
+	# define the jobs to be processed
+	fqs = $(wildcard fastqs/*_F.fq)
+	processdir = processed
+	combined      = $(patsubst fastqs/%_F.fq, $(processdir)/%_combined.fq, $(fqs))
 
-# use fastqconcat to combine each set of forward/reverse reads
-$(combined):$(processdir)/%_combined.fq: fastqs/%_F.fq
-	mkdir -p $(processdir)
-	$(eval samname := $(patsubst %_F.fq, %, $(notdir $<)))
-	fastqconcat \
-	--forward_fastq <(seqtk trimfq fastqs/$(samname)_F.fq) \
-	--reverse_fastq <(seqtk trimfq fastqs/$(samname)_R.fq) \
-	--outfile $@ \
-	--discard \
-	--keep_left 240 \
-	--keep_right 175 \
-	--revcomp \
-	--spacer \
-	--spacercharacters N \
-	--samplename $(samname) 
+	# use fastqconcat to combine each set of forward/reverse reads
+	$(combined):$(processdir)/%_combined.fq: fastqs/%_F.fq
+		mkdir -p $(processdir)
+		$(eval samname := $(patsubst %_F.fq, %, $(notdir $<)))
+		fastqconcat \
+		--forward_fastq <(seqtk trimfq fastqs/$(samname)_F.fq) \
+		--reverse_fastq <(seqtk trimfq fastqs/$(samname)_R.fq) \
+		--outfile $@ \
+		--discard \
+		--keep_left 240 \
+		--keep_right 175 \
+		--revcomp \
+		--spacer \
+		--spacercharacters N \
+		--samplename $(samname) 
 
-# note: $(eval ....) allow s you to assign variables within task blocks in make/
-# note: $(notdir ....) gives the filename of a PATH
+	# note: $(eval ....) allow s you to assign variables within task blocks in make/
+	# note: $(notdir ....) gives the filename of a PATH
 
-combine: $(combined)
+	combine: $(combined)
 ```
